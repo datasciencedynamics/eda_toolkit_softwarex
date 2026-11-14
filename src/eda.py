@@ -18,8 +18,10 @@ import matplotlib
 matplotlib.use("Agg")  # headless: write files, never open windows
 
 from eda_toolkit import (
+    data_doctor,
     dataframe_profiler,
     detect_outliers,
+    distribution_gof_plots,
     ensure_directory,
     flex_corr_matrix,
     generate_table1,
@@ -143,6 +145,39 @@ def step_figures(df: pd.DataFrame) -> None:
     )
 
 
+def step_gof_and_transform(df: pd.DataFrame) -> pd.DataFrame:
+    """Step 5: goodness-of-fit diagnostics for a skewed lab value, then a
+    reproducible Box-Cox transform of it written back as a new column."""
+    # creatinine is right-skewed (dialysis-range values in the tail); compare
+    # a normal fit against a lognormal fit on QQ and CDF/exceedance plots
+    for dist in ("norm", "lognorm"):
+        distribution_gof_plots(
+            df,
+            var="creatinine",
+            dist=dist,
+            plot_types=["qq", "cdf"],
+            tail="both",
+            figsize=(5.5, 4.5),  # per panel
+            image_path_png=str(FIG_PNG),
+            image_path_svg=str(FIG_SVG),
+            image_filename=str(FIG_PDF / f"fig3_gof_creatinine_{dist}.pdf"),
+        )
+
+    # transform in place: adds creatinine_boxcox and reports the change
+    data_doctor(
+        df,
+        feature_name="creatinine",
+        scale_conversion="boxcox",
+        apply_as_new_col_to_df=True,
+        plot_type="all",
+        figsize=(15, 4.5),
+        image_path_png=str(FIG_PNG),
+        image_path_svg=str(FIG_SVG),
+        image_filename=str(FIG_PDF / "fig4_data_doctor_creatinine_boxcox.pdf"),
+    )
+    return df
+
+
 @app.command()
 def main() -> None:
     """Run the EDA steps and write outputs."""
@@ -153,18 +188,22 @@ def main() -> None:
     typer.echo(f"Loaded {df.shape[0]:,} adults x {df.shape[1]} columns")
 
     profile = step_profile(df)
-    typer.echo(f"[1/4] profile: {profile.shape[0]} columns -> tables/profile.csv")
+    typer.echo(f"[1/5] profile: {profile.shape[0]} columns -> tables/profile.csv")
 
     table1 = step_table1(df)
-    typer.echo(f"[2/4] table1: {table1.shape[0]} rows -> tables/table1_*.md, table1.csv")
+    typer.echo(f"[2/5] table1: {table1.shape[0]} rows -> tables/table1_*.md, table1.csv")
 
     outliers, normality = step_screening(df)
-    typer.echo("[3/4] screening -> tables/outliers_iqr.csv, tables/normality.csv")
+    typer.echo("[3/5] screening -> tables/outliers_iqr.csv, tables/normality.csv")
     typer.echo(outliers.to_string(index=False))
     typer.echo(normality.to_string(index=False))
 
     step_figures(df)
-    typer.echo("[4/4] figures -> figures/{png,svg,pdf}/fig1_corr_matrix, fig2_distributions_by_diabetes")
+    typer.echo("[4/5] figures -> figures/{png,svg,pdf}/fig1_corr_matrix, fig2_distributions_by_diabetes")
+
+    df = step_gof_and_transform(df)
+    new_cols = [c for c in df.columns if c.startswith("creatinine_")]
+    typer.echo(f"[5/5] gof + transform -> fig3_gof_creatinine_*, fig4_data_doctor_*; new column(s): {new_cols}")
 
 
 if __name__ == "__main__":
