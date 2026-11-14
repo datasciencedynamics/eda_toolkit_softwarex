@@ -13,7 +13,18 @@ from pathlib import Path
 
 import pandas as pd
 import typer
-from eda_toolkit import dataframe_profiler, generate_table1
+import matplotlib
+
+matplotlib.use("Agg")  # headless: write files, never open windows
+
+from eda_toolkit import (
+    dataframe_profiler,
+    detect_outliers,
+    flex_corr_matrix,
+    generate_table1,
+    normality_tests,
+    plot_distributions,
+)
 
 app = typer.Typer(add_completion=False)
 
@@ -72,6 +83,59 @@ def step_table1(df: pd.DataFrame) -> pd.DataFrame:
     return table1
 
 
+def step_screening(df: pd.DataFrame) -> tuple:
+    """Step 3: batch outlier detection (IQR) and normality tests."""
+    outliers = detect_outliers(df, features=CONTINUOUS, method="iqr", threshold=1.5)
+    outliers.to_csv(TABLES / "outliers_iqr.csv", index=False)
+
+    normality = normality_tests(df, features=CONTINUOUS, alpha=0.05)
+    normality.to_csv(TABLES / "normality.csv", index=False)
+    return outliers, normality
+
+
+def step_figures(df: pd.DataFrame) -> None:
+    """Step 4: correlation matrix with FDR-adjusted significance, and
+    distributions of key measures by diabetes status."""
+    flex_corr_matrix(
+        df,
+        cols=CONTINUOUS,
+        corr_method="spearman",
+        show_significance=True,
+        significance_method="stars",
+        p_adjust="fdr_bh",
+        triangular=True,
+        cmap="coolwarm",
+        vmin=-1,
+        vmax=1,
+        figsize=(9, 8),
+        title="Spearman correlations, adults 20+ (NHANES 2017-2018)",
+        save_plots=True,
+        image_path_png=str(FIGURES),
+        image_path_svg=str(FIGURES),
+        image_filename="fig1_corr_matrix",
+    )
+
+    two_group = df.loc[df[GROUP].isin(["Yes", "No"])]
+    plot_distributions(
+        two_group,
+        vars_of_interest=["hba1c", "bmi", "systolic_bp"],
+        hue=GROUP,
+        plot_type="both",
+        fill=True,
+        fill_alpha=0.4,
+        n_rows=1,
+        n_cols=3,
+        subplot_figsize=(15, 4.5),
+        bins=40,
+        label_fontsize=12,
+        tick_fontsize=10,
+        image_path_png=str(FIGURES),
+        image_path_svg=str(FIGURES),
+        image_filename="fig2_distributions_by_diabetes",
+        bbox_inches="tight",
+    )
+
+
 @app.command()
 def main() -> None:
     """Run the EDA steps and write outputs."""
@@ -82,11 +146,18 @@ def main() -> None:
     typer.echo(f"Loaded {df.shape[0]:,} adults x {df.shape[1]} columns")
 
     profile = step_profile(df)
-    typer.echo(f"[1/2] profile: {profile.shape[0]} columns -> tables/profile.csv")
+    typer.echo(f"[1/4] profile: {profile.shape[0]} columns -> tables/profile.csv")
 
     table1 = step_table1(df)
-    typer.echo(f"[2/2] table1: {table1.shape[0]} rows -> tables/table1_*.md, table1.csv")
-    typer.echo(table1.to_string(index=False, max_colwidth=28))
+    typer.echo(f"[2/4] table1: {table1.shape[0]} rows -> tables/table1_*.md, table1.csv")
+
+    outliers, normality = step_screening(df)
+    typer.echo("[3/4] screening -> tables/outliers_iqr.csv, tables/normality.csv")
+    typer.echo(outliers.to_string(index=False))
+    typer.echo(normality.to_string(index=False))
+
+    step_figures(df)
+    typer.echo("[4/4] figures -> figures/fig1_corr_matrix.*, figures/fig2_distributions_by_diabetes.*")
 
 
 if __name__ == "__main__":
