@@ -13,8 +13,16 @@ import pandas as pd
 import requests
 
 CYCLE = "2017-2018"
+CYCLE_START = "2017"
 SUFFIX = "J"
-BASE_URL = f"https://wwwn.cdc.gov/Nchs/Nhanes/{CYCLE}/"
+
+# CDC moved the public-use files in 2025. Newest location first; the legacy
+# path is kept as a fallback.
+BASE_URLS = [
+    f"https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/{CYCLE_START}/DataFiles/",
+    f"https://wwwn.cdc.gov/Nchs/Nhanes/{CYCLE}/",
+]
+BASE_URL = BASE_URLS[0]
 
 # NHANES component files used in the paper, keyed by component name
 COMPONENTS: Dict[str, str] = {
@@ -62,20 +70,51 @@ def component_filename(component: str) -> str:
     return f"{component}_{SUFFIX}.XPT"
 
 
+def component_urls(component: str) -> list:
+    """Candidate download URLs for a component, newest CDC layout first."""
+    name = component_filename(component)
+    return [base + name for base in BASE_URLS] + [
+        base + name.replace(".XPT", ".xpt") for base in BASE_URLS
+    ]
+
+
 def component_url(component: str) -> str:
-    return BASE_URL + component_filename(component)
+    return component_urls(component)[0]
+
+
+def _looks_like_xpt(content: bytes) -> bool:
+    return content[:20].startswith(b"HEADER RECORD")
 
 
 def download_xpt(component: str, timeout: int = 120) -> pd.DataFrame:
-    """Download one NHANES XPT file from CDC and return it as a DataFrame."""
-    url = component_url(component)
-    headers = {"User-Agent": "eda_toolkit_softwarex/0.1 (research use)"}
-    response = requests.get(url, headers=headers, timeout=timeout)
-    response.raise_for_status()
-    with tempfile.NamedTemporaryFile(suffix=".XPT") as tmp:
-        tmp.write(response.content)
-        tmp.flush()
-        return pd.read_sas(tmp.name, format="xport")
+    """Download one NHANES XPT file from CDC and return it as a DataFrame.
+
+    Tries each candidate URL in turn and verifies the payload is a SAS
+    transport file before parsing, so an HTML error page fails loudly.
+    """
+    headers = {"User-Agent": "Mozilla/5.0 (eda_toolkit_softwarex; research use)"}
+    errors = []
+    for url in component_urls(component):
+        try:
+            response = requests.get(url, headers=headers, timeout=timeout)
+        except requests.RequestException as exc:
+            errors.append(f"{url}: {exc}")
+            continue
+        if response.status_code != 200:
+            errors.append(f"{url}: HTTP {response.status_code}")
+            continue
+        if not _looks_like_xpt(response.content):
+            ctype = response.headers.get("Content-Type", "unknown")
+            errors.append(f"{url}: not an XPT payload (Content-Type: {ctype})")
+            continue
+        with tempfile.NamedTemporaryFile(suffix=".XPT") as tmp:
+            tmp.write(response.content)
+            tmp.flush()
+            return pd.read_sas(tmp.name, format="xport")
+    raise RuntimeError(
+        f"Could not download {component_filename(component)} from CDC:\n  "
+        + "\n  ".join(errors)
+    )
 
 
 def read_components(raw_dir: Path, components: Iterable[str]) -> Dict[str, pd.DataFrame]:
