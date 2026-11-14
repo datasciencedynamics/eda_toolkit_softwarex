@@ -1,6 +1,7 @@
 # data and generated outputs never go to GitHub
 data/
 outputs/
+tables/
 
 # python
 __pycache__/
@@ -17,3 +18,4 @@ venv/
 .DS_Store
 .vscode/
 .idea/
+
