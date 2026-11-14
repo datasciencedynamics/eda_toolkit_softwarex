@@ -1,4 +1,4 @@
-"""Fetch raw NHANES 2017-2018 component files and save them unchanged.
+"""Fetch raw NHANES August 2021-August 2023 component files and save them unchanged.
 
 Usage:
     python src/data_gen.py            # Parquet only

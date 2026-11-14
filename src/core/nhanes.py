@@ -1,4 +1,4 @@
-"""Reusable helpers for pulling and labeling NHANES 2017-2018 data.
+"""Reusable helpers for pulling and labeling NHANES August 2021-August 2023 data.
 
 Nothing here filters or engineers features; that belongs in preprocessing.py.
 """
@@ -12,9 +12,9 @@ from typing import Dict, Iterable
 import pandas as pd
 import requests
 
-CYCLE = "2017-2018"
-CYCLE_START = "2017"
-SUFFIX = "J"
+CYCLE = "2021-2023"
+CYCLE_START = "2021"
+SUFFIX = "L"
 
 # CDC moved the public-use files in 2025. Newest location first; the legacy
 # path is kept as a fallback.
@@ -28,7 +28,7 @@ BASE_URL = BASE_URLS[0]
 COMPONENTS: Dict[str, str] = {
     "DEMO": "Demographics",
     "BMX": "Body measures",
-    "BPX": "Blood pressure",
+    "BPXO": "Blood pressure (oscillometric)",
     "GHB": "Glycohemoglobin (HbA1c)",
     "BIOPRO": "Standard biochemistry profile",
     "DIQ": "Diabetes questionnaire",
@@ -42,8 +42,8 @@ RENAME: Dict[str, str] = {
     "INDFMPIR": "income_poverty_ratio",
     "BMXBMI": "bmi",
     "BMXWAIST": "waist_cm",
-    "BPXSY1": "systolic_bp",
-    "BPXDI1": "diastolic_bp",
+    "BPXOSY1": "systolic_bp",
+    "BPXODI1": "diastolic_bp",
     "LBXGH": "hba1c",
     "LBXSCR": "creatinine",
     "LBXSAL": "albumin",
@@ -66,7 +66,7 @@ DIABETES = {1: "Yes", 2: "No", 3: "Borderline"}
 
 
 def component_filename(component: str) -> str:
-    """'DEMO' -> 'DEMO_J.XPT'."""
+    """'DEMO' -> 'DEMO_L.XPT'."""
     return f"{component}_{SUFFIX}.XPT"
 
 

@@ -2,7 +2,7 @@
 
 Companion repository for the SoftwareX paper on [`eda_toolkit`](https://github.com/datasciencedynamics/eda_toolkit).
 It reproduces every table and figure in the paper's illustrative example from
-public NHANES 2017-2018 data.
+public NHANES August 2021-August 2023 data.
 
 ## Pipeline
 
@@ -27,8 +27,8 @@ Run `make help` to list targets.
 
 ## Data
 
-NHANES 2017-2018 public-use files from the National Center for Health
-Statistics: DEMO_J, BMX_J, BPX_J, GHB_J, BIOPRO_J, DIQ_J. Adults aged 20 and
+NHANES August 2021-August 2023 public-use files from the National Center for Health
+Statistics: DEMO_L, BMX_L, BPXO_L, GHB_L, BIOPRO_L, DIQ_L. Adults aged 20 and
 over with a known self-reported diabetes status (DIQ010) are retained.
 
 ## Authors

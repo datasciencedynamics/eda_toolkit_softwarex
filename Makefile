@@ -31,7 +31,7 @@ requirements:
 # PIPELINE                                                                     #
 ################################################################################
 
-## Download raw NHANES 2017-2018 components to data/raw (Parquet)
+## Download raw NHANES 2021-2023 components to data/raw (Parquet)
 data_gen:
 	cd src && $(PYTHON_INTERPRETER) data_gen.py
 

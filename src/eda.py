@@ -115,7 +115,7 @@ def step_figures(df: pd.DataFrame) -> None:
         vmin=-1,
         vmax=1,
         figsize=(9, 8),
-        title="Spearman correlations, adults 20+ (NHANES 2017-2018)",
+        title="Spearman correlations, adults 20+ (NHANES 2021-2023)",
         save_plots=True,
         image_path_png=str(FIG_PNG),
         image_path_svg=str(FIG_SVG),
