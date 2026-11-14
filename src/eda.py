@@ -191,6 +191,8 @@ def step_gof_and_transform(df: pd.DataFrame) -> pd.DataFrame:
         scale_conversion="boxcox",
         apply_as_new_col_to_df=True,
         plot_type=["hist", "box_violin"],
+        hist_kws={"color": "#4d4d4d"},
+        box_violin_kws={"color": "#4d4d4d"},
         figsize=(10, 3.8),
         label_fontsize=12,
         tick_fontsize=10,
