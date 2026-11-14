@@ -55,6 +55,20 @@ CONTINUOUS = [
 ]
 CATEGORICAL = ["sex", "race_ethnicity"]
 
+# readable axis labels for figures
+PRETTY = {
+    "age": "Age",
+    "income_poverty_ratio": "Income / poverty",
+    "bmi": "BMI",
+    "waist_cm": "Waist (cm)",
+    "systolic_bp": "Systolic BP",
+    "diastolic_bp": "Diastolic BP",
+    "hba1c": "HbA1c",
+    "creatinine": "Creatinine",
+    "albumin": "Albumin",
+    "total_cholesterol": "Total cholesterol",
+}
+
 
 def load() -> pd.DataFrame:
     df = pd.read_parquet(PROCESSED)
@@ -106,6 +120,7 @@ def step_figures(df: pd.DataFrame) -> None:
     flex_corr_matrix(
         df,
         cols=CONTINUOUS,
+        label_names=PRETTY,
         corr_method="spearman",
         show_significance=True,
         significance_method="stars",
@@ -114,7 +129,12 @@ def step_figures(df: pd.DataFrame) -> None:
         cmap="coolwarm",
         vmin=-1,
         vmax=1,
-        figsize=(9, 8),
+        figsize=(11, 9.5),
+        label_fontsize=11,
+        annot_fontsize=9,
+        tick_fontsize=10,
+        xlabel_rot=40,
+        text_wrap=70,
         title="Spearman correlations, adults 20+ (NHANES 2021-2023)",
         save_plots=True,
         image_path_png=str(FIG_PNG),
