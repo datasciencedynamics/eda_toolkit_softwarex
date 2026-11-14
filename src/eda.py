@@ -20,6 +20,7 @@ matplotlib.use("Agg")  # headless: write files, never open windows
 from eda_toolkit import (
     dataframe_profiler,
     detect_outliers,
+    ensure_directory,
     flex_corr_matrix,
     generate_table1,
     normality_tests,
@@ -30,8 +31,12 @@ app = typer.Typer(add_completion=False)
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 PROCESSED = PROJECT_DIR / "data" / "processed" / "nhanes_adults.parquet"
-TABLES = PROJECT_DIR / "outputs" / "tables"
-FIGURES = PROJECT_DIR / "outputs" / "figures"
+OUTPUTS = PROJECT_DIR / "outputs"
+TABLES = OUTPUTS / "tables"
+FIGURES = OUTPUTS / "figures"
+FIG_PNG = FIGURES / "png"
+FIG_SVG = FIGURES / "svg"
+FIG_PDF = FIGURES / "pdf"
 
 GROUP = "diabetes"
 CONTINUOUS = [
@@ -110,9 +115,11 @@ def step_figures(df: pd.DataFrame) -> None:
         figsize=(9, 8),
         title="Spearman correlations, adults 20+ (NHANES 2017-2018)",
         save_plots=True,
-        image_path_png=str(FIGURES),
-        image_path_svg=str(FIGURES),
-        image_filename="fig1_corr_matrix",
+        image_path_png=str(FIG_PNG),
+        image_path_svg=str(FIG_SVG),
+        # a full path with extension is saved verbatim, so this yields the PDF
+        # alongside the PNG and SVG written to the directories above
+        image_filename=str(FIG_PDF / "fig1_corr_matrix.pdf"),
     )
 
     two_group = df.loc[df[GROUP].isin(["Yes", "No"])]
@@ -129,9 +136,9 @@ def step_figures(df: pd.DataFrame) -> None:
         bins=40,
         label_fontsize=12,
         tick_fontsize=10,
-        image_path_png=str(FIGURES),
-        image_path_svg=str(FIGURES),
-        image_filename="fig2_distributions_by_diabetes",
+        image_path_png=str(FIG_PNG),
+        image_path_svg=str(FIG_SVG),
+        image_filename=str(FIG_PDF / "fig2_distributions_by_diabetes.pdf"),
         bbox_inches="tight",
     )
 
@@ -139,8 +146,8 @@ def step_figures(df: pd.DataFrame) -> None:
 @app.command()
 def main() -> None:
     """Run the EDA steps and write outputs."""
-    TABLES.mkdir(parents=True, exist_ok=True)
-    FIGURES.mkdir(parents=True, exist_ok=True)
+    for directory in (TABLES, FIG_PNG, FIG_SVG, FIG_PDF):
+        ensure_directory(str(directory))
 
     df = load()
     typer.echo(f"Loaded {df.shape[0]:,} adults x {df.shape[1]} columns")
@@ -157,7 +164,7 @@ def main() -> None:
     typer.echo(normality.to_string(index=False))
 
     step_figures(df)
-    typer.echo("[4/4] figures -> figures/fig1_corr_matrix.*, figures/fig2_distributions_by_diabetes.*")
+    typer.echo("[4/4] figures -> figures/{png,svg,pdf}/fig1_corr_matrix, fig2_distributions_by_diabetes")
 
 
 if __name__ == "__main__":

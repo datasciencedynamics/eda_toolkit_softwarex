@@ -56,7 +56,7 @@ clean_data:
 
 ## Remove generated tables and figures
 clean_outputs:
-	find $(PROJECT_DIR)/outputs -type f ! -name '.gitkeep' -delete
+	rm -rf $(PROJECT_DIR)/outputs
 
 ## Remove data and outputs
 clean: clean_data clean_outputs

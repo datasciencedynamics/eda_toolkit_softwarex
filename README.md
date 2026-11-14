@@ -10,9 +10,9 @@ public NHANES 2017-2018 data.
 |---|---|---|
 | 1 | `src/data_gen.py` | raw NHANES components in `data/raw/` (Parquet) |
 | 2 | `src/preprocessing.py` | `data/processed/nhanes_adults.parquet` |
-| 3 | `src/eda.py` | tables in `outputs/tables/`, figures in `outputs/figures/` |
+| 3 | `src/eda.py` | tables in `outputs/tables/`, figures in `outputs/figures/{png,svg,pdf}/` |
 
-`data/` is gitignored; everything in it is downloaded from CDC on first run.
+`data/` and `outputs/` are gitignored; `make all` regenerates both from CDC downloads.
 
 ## Quick start
 

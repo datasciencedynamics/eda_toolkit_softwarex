@@ -1,5 +1,6 @@
-# data never goes to GitHub
+# data and generated outputs never go to GitHub
 data/
+outputs/
 
 # python
 __pycache__/
