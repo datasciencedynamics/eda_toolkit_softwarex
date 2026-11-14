@@ -149,15 +149,14 @@ def step_gof_and_transform(df: pd.DataFrame) -> pd.DataFrame:
     """Step 5: goodness-of-fit diagnostics for a skewed lab value, then a
     reproducible Box-Cox transform of it written back as a new column."""
     # creatinine is right-skewed (dialysis-range values in the tail); compare
-    # a normal fit against a lognormal fit on QQ and CDF/exceedance plots
+    # a normal fit against a lognormal fit on QQ plots
     for dist in ("norm", "lognorm"):
         distribution_gof_plots(
             df,
             var="creatinine",
             dist=dist,
-            plot_types=["qq", "cdf"],
-            tail="both",
-            figsize=(5.5, 4.5),  # per panel
+            plot_types=["qq"],
+            figsize=(5.5, 4.5),
             image_path_png=str(FIG_PNG),
             image_path_svg=str(FIG_SVG),
             image_filename=str(FIG_PDF / f"fig3_gof_creatinine_{dist}.pdf"),
