@@ -1,4 +1,4 @@
-<p align="center">
+<p align="left">
   <a href="https://github.com/datasciencedynamics/eda_toolkit">
     <img src="https://raw.githubusercontent.com/datasciencedynamics/eda_toolkit/main/assets/eda_toolkit_logo.svg" width="300" alt="eda_toolkit">
   </a>
