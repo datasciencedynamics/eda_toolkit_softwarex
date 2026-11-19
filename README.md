@@ -1,16 +1,9 @@
-<p align="center">
-  <a href="https://github.com/datasciencedynamics/eda_toolkit">
-    <img src="https://raw.githubusercontent.com/datasciencedynamics/eda_toolkit/main/assets/eda_toolkit_logo.svg" width="300" alt="eda_toolkit">
-  </a>
-</p>
+<a href="https://github.com/datasciencedynamics/eda_toolkit"><img src="https://raw.githubusercontent.com/datasciencedynamics/eda_toolkit/main/assets/eda_toolkit_logo.svg" width="300" alt="eda_toolkit"></a>
 
-<h1 align="center">EDA Toolkit: SoftwareX Companion</h1>
+# EDA Toolkit: SoftwareX Companion
 
-<p align="center">
-  <a href="https://github.com/datasciencedynamics/eda_toolkit"><img src="https://img.shields.io/badge/library-eda__toolkit-blue" alt="eda_toolkit"></a>
-  <a href="https://pypi.org/project/eda_toolkit/"><img src="https://img.shields.io/pypi/v/eda_toolkit.svg" alt="PyPI"></a>
-  <a href="LICENSE.md"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT"></a>
-</p>
+[![PyPI](https://img.shields.io/pypi/v/eda_toolkit.svg)](https://pypi.org/project/eda_toolkit/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 Companion repository for the SoftwareX paper
 
